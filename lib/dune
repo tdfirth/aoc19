@@ -1,0 +1,4 @@
+(library
+ (name aoc19)
+ (public_name aoc19)
+ (libraries core))

@@ -1,0 +1,4 @@
+(executable
+ (public_name aoc19)
+ (name main)
+ (libraries aoc19))
