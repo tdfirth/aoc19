@@ -1,5 +1,4 @@
 open Aoc19
 
 let () =
-  print_endline
-    (Format.sprintf "Fuel Required: %d" (Day1.total_fuel "inputs/day1"))
+  Day2.printi (Day2.eval (Day2.set_vals (Day2.load_program "inputs/day2") 12 2))
