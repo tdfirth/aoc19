@@ -30,7 +30,7 @@ let eval program =
   let rec loop p i =
     let op = nth p i in
     (* Result in address 0 *)
-    if op = 99 then nth p 0
+    if op = 99 then p
     else
       let a = nth p (i + 1) in
       let b = nth p (i + 2) in

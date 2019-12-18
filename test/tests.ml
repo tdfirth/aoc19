@@ -6,10 +6,11 @@ let run_test day assertion expectation =
   else Printf.printf "Test case for day %d failed.\n" day
 
 let day_1_test =
+  (* Updated for part 2 *)
   run_test 1 (Day1.fuel_required 12) 2;
   run_test 1 (Day1.fuel_required 14) 2;
-  run_test 1 (Day1.fuel_required 1969) 654;
-  run_test 1 (Day1.fuel_required 100756) 33583
+  run_test 1 (Day1.fuel_required 1969) 966;
+  run_test 1 (Day1.fuel_required 100756) 50346
 
 let day_2_test =
   run_test 2 (Day2.eval [ 1; 0; 0; 0; 99 ]) [ 2; 0; 0; 0; 99 ];
