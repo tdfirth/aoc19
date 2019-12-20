@@ -19,3 +19,17 @@ let day_2_test =
   run_test 2
     (Day2.eval [ 1; 1; 1; 4; 99; 5; 6; 0; 99 ])
     [ 30; 1; 1; 4; 2; 5; 6; 0; 99 ]
+
+let day_3_test =
+  let one =
+    Day3.find_nearest
+      (Day3.compute_path "R75,D30,R83,U83,L12,D49,R71,U7,L72")
+      (Day3.compute_path "U62,R66,U55,R34,D71,R55,D58,R83")
+  in
+  run_test 3 one 159;
+  let two =
+    Day3.find_nearest
+      (Day3.compute_path "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51")
+      (Day3.compute_path "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7")
+  in
+  run_test 3 two 135

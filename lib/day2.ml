@@ -1,16 +1,9 @@
+(* Day2
+ *)
 open List
 
 let load_program path =
   List.map int_of_string (Utils.split (hd (Utils.get_lines path)) ',')
-
-let rec print_list = function
-  | [] -> print_string "\n"
-  | e :: l ->
-      print_int e;
-      print_string " ";
-      print_list l
-
-let printi i = Printf.printf "%d\n" i
 
 let split n xs =
   let rec loop acc n xs =
@@ -43,3 +36,19 @@ let eval program =
   loop program 0
 
 let set_vals l a b = update (update l 1 a) 2 b
+
+let cart_prod l1 l2 =
+  List.fold_left
+    (fun acc1 ele1 ->
+      List.fold_left (fun acc2 ele2 -> (ele1, ele2) :: acc2) acc1 l2)
+    [] l1
+
+let find_solution program goal =
+  let ns = Core.Sequence.to_list (Core.Sequence.range 0 100) in
+  let inputs = cart_prod ns ns in
+  let compute (a, b) = nth (eval (set_vals program a b)) 0 in
+  let result r = match r with a, b -> (100 * a) + b in
+  let rec search i =
+    if compute (hd i) = goal then result (hd i) else search (tl i)
+  in
+  search inputs
