@@ -52,7 +52,7 @@ let visited steps =
               let inc_y = inc b in
               let move_to = Point.make (x + inc_x) (y + inc_y) (n + 1) in
               let next_step = Point.make (a - inc_x) (b - inc_y) 0 in
-              Point.pp move_to;
+              (* Point.pp move_to; *)
               inner move_to next_step (Set.add visited move_to) )
     in
     match remaining with
@@ -88,5 +88,5 @@ let find_nearest a b =
     (find a p).n + (find b p).n
   in
   let delays = List.map ~f:delay intersections in
-  List.iter ~f:(Printf.printf "%d ") delays;
+  (* List.iter ~f:(Printf.printf "%d ") delays; *)
   min delays
