@@ -7,22 +7,10 @@
 open Core
 
 module Point = struct
-  (* TODO Make this a record with a coordinate and an 'n'. *)
   module T = struct
-    type t = { x : int; y : int; n : int } [@@deriving sexp_of]
+    type t = int * int [@@deriving compare, sexp_of]
 
-    (* Only x and y determine if a point has been visited.
-     * This does mean that if a point is visited twice we lose
-     * the information about when that happened. However
-     * for this problem we always care about the lowest n 
-     * for that point so it's fine. *)
-    let compare a b =
-      let cmp_x = Int.compare a.x b.x in
-      if cmp_x <> 0 then cmp_x else Int.compare a.y b.y
-
-    let make x y n = { x; y; n }
-
-    let pp p = Printf.printf "( %d, %d, %d )" p.x p.y p.n
+    let pp (x, y) = Printf.printf "( %d, %d )" x y
   end
 
   include T
@@ -33,35 +21,44 @@ let parse_step step =
   let dir = step.[0] in
   let mag = String.drop_prefix step 1 |> Int.of_string in
   match dir with
-  | 'R' -> Point.make mag 0 0
-  | 'L' -> Point.make (-mag) 0 0
-  | 'U' -> Point.make 0 mag 0
-  | 'D' -> Point.make 0 (-mag) 0
+  | 'R' -> (mag, 0)
+  | 'L' -> (-mag, 0)
+  | 'U' -> (0, mag)
+  | 'D' -> (0, -mag)
   | _ -> raise (Failure "Invalid direction.")
 
 let visited steps =
-  let rec outer current remaining visited =
-    let rec inner start step visited =
+  let inc s = if s = 0 then 0 else s / abs s in
+  let rec outer current_position remaining all_points n =
+    let rec inner start_position step positions_visited n =
       match step with
-      | { Point.x = 0; Point.y = 0; _ } -> (start, visited)
-      | { Point.x = a; Point.y = b; _ } -> (
-          match start with
-          | { Point.x; Point.y; Point.n } ->
-              let inc s = if s = 0 then 0 else s / abs s in
+      | 0, 0 -> (start_position, positions_visited, n)
+      | a, b -> (
+          match start_position with
+          | x, y ->
               let inc_x = inc a in
               let inc_y = inc b in
-              let move_to = Point.make (x + inc_x) (y + inc_y) (n + 1) in
-              let next_step = Point.make (a - inc_x) (b - inc_y) 0 in
-              (* Point.pp move_to; *)
-              inner move_to next_step (Set.add visited move_to) )
+              let move_to = (x + inc_x, y + inc_y) in
+              let next_step = (a - inc_x, b - inc_y) in
+              let updated_n = n + 1 in
+              let updated_positions =
+                match
+                  Map.add positions_visited ~key:move_to ~data:updated_n
+                with
+                | `Ok m -> m
+                | `Duplicate -> positions_visited
+              in
+              inner move_to next_step updated_positions updated_n )
     in
     match remaining with
-    | [] -> visited
+    | [] -> all_points
     | step :: rest ->
-        let next, visited = inner current (parse_step step) visited in
-        outer next rest visited
+        let next, visited, new_n =
+          inner current_position (parse_step step) all_points n
+        in
+        outer next rest visited new_n
   in
-  outer (Point.make 0 0 0) steps (Set.empty (module Point))
+  outer (0, 0) steps (Map.empty (module Point)) 0
 
 let compute_path p = Utils.split p ',' |> visited
 
@@ -74,19 +71,11 @@ let min l =
   loop (List.hd_exn l) (List.tl_exn l)
 
 let find_nearest a b =
-  (* Set.iter a ~f:Point.pp; *)
-  (* Set.iter b ~f:Point.pp; *)
-  let intersections = Set.inter a b |> Set.to_list in
-  let delay p =
-    let cmp a b =
-      let c = Point.compare a b in
-      if c = 0 then false else true
-    in
-    let find x p =
-      Set.find x ~f:(fun other -> cmp p other) |> Option.value_exn
-    in
-    (find a p).n + (find b p).n
+  let intersections =
+    let a_visited = Set.of_list (module Point) (Map.keys a) in
+    let b_visited = Set.of_list (module Point) (Map.keys b) in
+    Set.inter a_visited b_visited |> Set.to_list
   in
+  let delay p = Map.find_exn a p + Map.find_exn b p in
   let delays = List.map ~f:delay intersections in
-  (* List.iter ~f:(Printf.printf "%d ") delays; *)
   min delays
